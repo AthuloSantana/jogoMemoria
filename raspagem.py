@@ -3,6 +3,7 @@ import requests
 from urllib.request import urlopen
 from bs4 import BeautifulSoup
 from urllib.parse import urlparse, parse_qs
+import threading
 
 headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:123.0) Gecko/20100101 Firefox/123.0",
@@ -24,18 +25,21 @@ save_directory = 'D:\SistemasDistribuidos\jogoMemoria\downloads'
 os.makedirs(save_directory, exist_ok=True)
 
 
+def download_imagem(url):
+    nome = url.split('/')[-1]
+    caminho_imagem = os.path.join(save_directory, nome)
+    response = requests.get(url, headers=headers)
+
+    if response.ok:
+        with open(caminho_imagem, 'wb') as image_file:
+            image_file.write(response.content)
+        print(f'Imagem {caminho_imagem} baixada com sucesso.')
+    else:
+        print(f'Falha ao baixar {caminho_imagem}. Código de status: {response.status_code} {url}')
 
 for image in images:
     url = image.attrs.get('src') ## Obtém um dicionario e busca todos os atributos src de image
     
     if url.endswith('png'):
-        nome = url.split('/')[-1]
-        caminho_imagem = os.path.join(save_directory, nome)
-        response = requests.get(url, headers=headers)
-
-        if response.ok:
-            with open(caminho_imagem, 'wb') as image_file:
-                image_file.write(response.content)
-            print(f'Imagem {caminho_imagem} baixada com sucesso.')
-        else:
-            print(f'Falha ao baixar {caminho_imagem}. Código de status: {response.status_code} {url}')
+       thread = threading.Thread(target=download_imagem, args=(url, ))
+       thread.start()

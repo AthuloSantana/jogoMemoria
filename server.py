@@ -1,15 +1,16 @@
+import pickle
 from socket import *
 from threading import *
-import datetime
 from selecionandoImagens import imagens
-import pickle
 
 clients = []
 nomes_clientes = {}
 
-def clientThread(clientSocket):
+
+def clientThread(clientSocket, inicia):
     clientSocket.send(pickle.dumps(imagens))
-    
+    clientSocket.send(pickle.dumps(inicia))
+
     while True:
         msg = clientSocket.recv(1024)
 
@@ -22,16 +23,17 @@ def clientThread(clientSocket):
             if client != clientSocket:
                 client.sendall(pickle.dumps(msg))
 
-    
-hostSocket = socket(AF_INET, SOCK_STREAM) # Cria um socket tcp/ip
-hostSocket.setsockopt(SOL_SOCKET, SO_REUSEADDR,1) #permitindo que o endereço do soquete seja reutilizado imediatamente após o encerramento do soquete anterior
+
+hostSocket = socket(AF_INET, SOCK_STREAM)  # Cria um socket tcp/ip
+hostSocket.setsockopt(SOL_SOCKET, SO_REUSEADDR,
+                      1)  # permitindo que o endereço do soquete seja reutilizado imediatamente após o encerramento do soquete anterior
 
 hostIp = "0.0.0.0"
 portNumber = 5001
 hostSocket.bind((hostIp, portNumber))
 hostSocket.listen()
 
-print ("Aguardando conexão...")
+print("Aguardando conexão...")
 
 while True:
     if len(clients) < 2:
@@ -44,9 +46,9 @@ while True:
         print("Conectado por: " + nome_cliente)
 
     if len(clients) == 2:
-        thread = Thread(target=clientThread, args=(clients[0],))
+        thread = Thread(target=clientThread, args=(clients[0], True))
         thread.start()
 
-        thread2 = Thread(target=clientThread, args=(clients[1],))
+        thread2 = Thread(target=clientThread, args=(clients[1], False))
         thread2.start()
         break

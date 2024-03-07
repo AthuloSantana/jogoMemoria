@@ -21,7 +21,7 @@ soup = BeautifulSoup(htmldata.text, 'html.parser')
 
 images = soup.find_all('img', class_='aligncenter')
 
-save_directory = 'D:\SistemasDistribuidos\jogoMemoria\downloads'
+save_directory = 'D:\SistemasDistribuidos\jMemoria\downloads'
 os.makedirs(save_directory, exist_ok=True)
 
 
